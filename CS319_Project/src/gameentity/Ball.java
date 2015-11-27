@@ -141,6 +141,24 @@ public class Ball extends ScreenElement
 		return false;
 	}
 	
+	// Check the collision from left part of the ball
+        public boolean containsLeftPart(Point p)
+        {
+                if (p.x > point.x && p.x < point.x + (SIZE / 2))
+			if (p.y > point.y && p.y < point.y + SIZE)
+				return true;
+		return false;
+        }
+        
+        // Check the collision from right part of the ball
+        public boolean containsRightPart(Point p)
+        {
+            	if (p.x >= point.x + (SIZE / 2) && p.x < point.x + SIZE)
+			if (p.y > point.y && p.y < point.y + SIZE)
+				return true;
+		return false;
+        }
+	
 	@Override
 	public void draw( Graphics g) 
 	{
