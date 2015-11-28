@@ -17,10 +17,35 @@ public class BallSequence extends ScreenElement
 		return balls;
 	}
 	
+	// Returns the ball at the specified position
+        public Ball getBall(int index)
+        {
+          return  balls.get(index);
+        }
+	
 	public void addToBalls( Ball b)
 	{
 		balls.add( b);
 	}
+	
+	// Add the specified ball to specified index in balls.
+        public void addToBalls(int index, Ball b)
+	{
+		balls.add(index, b);
+	}
+        
+        // Removes the ball at the specified position
+        public void removeBall(int index)
+        {
+            balls.remove(index);
+        }
+        
+        // fromIndex and toIndex are inclusive
+        public void removeBalls(int fromIndex, int toIndex)
+        {
+            for(int i = fromIndex; i <= toIndex; i++)
+                balls.remove(i);
+        }
 	
 	public void slide()
 	{
@@ -55,6 +80,33 @@ public class BallSequence extends ScreenElement
 				return true;
 		return false;
 	}
+	
+	 // In balls, finds the index of a ball which is hit by the thrown ball(current)
+        public int getIndexOfTargetBall(Point p)
+        {
+            int index = -1;
+            
+            for (int i = 0; i < balls.size(); i++)
+            {
+                if ((balls.get(i)).contains(p))
+                    index = i;
+            }
+            return index;
+			
+        }
+        
+        // In balls, find the ball which is hit by the thrown ball(current)
+        public Ball getTargetBall(Point p)
+        {
+            Ball  target = new Ball();
+            
+            for (int i = 0; i < balls.size(); i++)
+            {
+                if ((balls.get(i)).contains(p))
+                    target = balls.get(i);
+            }
+            return target;
+        }
 	
 	public int getSize()
 	{
