@@ -30,14 +30,14 @@ public class Coin extends ScreenElement
 	
 	public boolean contains( Point p)
 	{
-		return (p.x >= point.x && p.x <= point.x + 5
-				&& p.y >= point.y && p.y <= point.y + 5);	
+		return (p.x >= point.getX() && p.x <= point.getX() + 5
+				&& p.y >= point.getY() && p.y <= point.getY() + 5);	
 	}
 	
 	@Override
 	public void draw( Graphics g)
 	{
 		g.setColor( Color.YELLOW);
-		g.fillOval( point.x, point.y, 5, 5);
+		g.fillOval( (int) point.getX(), (int) point.getY(), 5, 5);
 	}
 }

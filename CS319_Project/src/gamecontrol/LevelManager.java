@@ -1,17 +1,15 @@
 package gamecontrol;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JFrame;
 
 import gameentity.Ball;
 import gameentity.BallSequence;
 import gameentity.BallShooter;
-import gameentity.Hole;
 import gameentity.LevelScreen;
 
-public class LevelManager implements ActionListener
+public class LevelManager 
 {
 	private GameManager gameManager;
 	private LevelInputManager levelInputManager;
@@ -40,7 +38,7 @@ public class LevelManager implements ActionListener
 		return levelNo;
 	}
 
-	public void setLevelNo( int levelNo)
+	private void setLevelNo( int levelNo)
 	{
 		this.levelNo = levelNo;
 	}
@@ -52,21 +50,42 @@ public class LevelManager implements ActionListener
 	
 	public void startLevel( int levelNo)
 	{
-		timerManager = new TimerManager( this, (int) (1.0F / levelNo * 1000));
+		LevelTimerListener levelTimerListener = new LevelTimerListener( this);
+		LevelTimerListener.SequenceTimerListener sequenceTimerListener = 
+						  levelTimerListener.new SequenceTimerListener();
+		
+		timerManager = new TimerManager( levelTimerListener, sequenceTimerListener,
+										 (int) (1.0F / levelNo * 1000));
+		timerManager.startTimer();
+		setLevelNo( levelNo);
 	}
 	
-	public void rotateShooter( int angle)
+	public void rotateShooter( double angle)
 	{
 		LevelScreen screen = levelScreenManager.getScreen();
 		BallShooter shooter = screen.getShooter();
-		shooter.rotate( angle);
+		AffineTransform at = shooter.rotate( angle);
+		screen.setAffineTransform( at);
+		screen.repaint();
 	}
 	
-	public void throwBall()
+	public void throwBall( Point shoot)
 	{
 		LevelScreen screen = levelScreenManager.getScreen();
 		BallShooter shooter = screen.getShooter();
-		shooter.shoot();
+		shooter.shoot( shoot);
+	}
+	
+	public void updateSequence( Ball current, BallSequence sequence, int index)
+	{
+		collisionManager.updateSequence( current, sequence, index);
+	}
+	
+	public boolean isShooting()
+	{
+		LevelScreen screen = levelScreenManager.getScreen();
+		BallShooter shooter = screen.getShooter();
+		return shooter.isShooting();
 	}
 	
 	public void changeBallType( Ball.BallType type)
@@ -76,6 +95,7 @@ public class LevelManager implements ActionListener
 			LevelScreen screen = levelScreenManager.getScreen();
 			BallShooter shooter = screen.getShooter();
 			shooter.changeBallType( type);
+			screen.repaint();
 			undo = true;
 		}
 	}
@@ -87,6 +107,7 @@ public class LevelManager implements ActionListener
 			LevelScreen screen = levelScreenManager.getScreen();
 			BallShooter shooter = screen.getShooter();
 			shooter.changeBallType( undoBallType);
+			screen.repaint();
 			undo = false;
 		}
 	}
@@ -101,7 +122,22 @@ public class LevelManager implements ActionListener
 		gameManager.help();
 	}
 	
-	private void finishLevel( int status)
+	public LevelScreen getLevelScreen()
+	{
+		return levelScreenManager.getScreen();
+	}
+	
+	public void startSequence()
+	{
+		timerManager.startSequence();
+	}
+	
+	public void stopSequence()
+	{
+		timerManager.stopSequence();
+	}
+	
+	public void finishLevel( int status)
 	{
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
@@ -117,33 +153,5 @@ public class LevelManager implements ActionListener
 		
 		frame.setVisible( true);
 		timerManager.stopTimer();
-	}
-
-	@Override
-	public void actionPerformed( ActionEvent arg0)
-	{
-		LevelScreen screen = levelScreenManager.getScreen();
-		BallShooter shooter = screen.getShooter();
-		BallSequence sequence = screen.getSequence();
-		Hole hole = screen.getHole();
-		
-		sequence.slide();
-		
-		if (shooter.getShooting())
-		{
-			shooter.shoot();
-			
-			Ball current = shooter.getCurrent();
-			if (sequence.contains( current.getPoint()))
-			{
-				collisionManager.updateSequence( current, sequence);
-				shooter.switchShooting();
-			}
-		}
-		
-		if (hole.containsBall( sequence))
-			finishLevel( 0); // lost
-		if (sequence.getSize() == 0)
-			finishLevel( 1); // won
 	}
 }

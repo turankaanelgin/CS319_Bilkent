@@ -17,9 +17,12 @@ public class Hole extends ScreenElement
 		for (int i = 0; i < balls.size(); i++)
 		{
 			Ball b = balls.get( i);
-			if (b.point.x >= point.x && b.point.x <= point.x + 30
-				&& b.point.y >= point.y && b.point.y <= point.y + 30)
-				return true;
+			if (b.point != null)
+			{
+				if (b.point.x >= point.x && b.point.x <= point.x + 30
+					&& b.point.y >= point.y && b.point.y <= point.y + 30)
+					return true;
+			}
 		}
 		return false;
 	}

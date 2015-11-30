@@ -18,13 +18,20 @@ public class LevelInputManager extends MouseAdapter implements KeyListener
 	@Override
 	public void mousePressed( MouseEvent event)
 	{
-		levelManager.throwBall();
+		if (!levelManager.isShooting())
+			levelManager.throwBall( event.getPoint());
 	}
 	
 	@Override
 	public void mouseMoved( MouseEvent event)
-	{
-		
+	{ 
+		if (!levelManager.isShooting())
+		{
+			float xDist = event.getX() - 450;
+			float yDist = event.getY() - 450;
+			double angle = Math.toDegrees( Math.atan2( yDist, xDist));
+			levelManager.rotateShooter( angle);
+		}
 	}
 
 	@Override

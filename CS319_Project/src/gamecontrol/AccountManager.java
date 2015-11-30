@@ -44,13 +44,13 @@ public class AccountManager
 	public void addPlayer( String userName, String password)
 	{
 		Player player = new Player( ++lastId, userName, password);
-		players.add( lastId, player);
+		players.add( lastId - 1, player);
 		gameManager.addPlayerProxy( lastId, password);
 	}
 	
 	public void removePlayer( int id)
 	{
-		players.remove( id);
+		players.set( id - 1, null);
 	}
 	
 	public void addPlayerItem( StoreItem item)
@@ -112,6 +112,6 @@ public class AccountManager
 	
 	public void loadCurrentPlayer( int id)
 	{
-		currentPlayer = players.get( id);
+		currentPlayer = players.get( id - 1);
 	}
 }

@@ -3,6 +3,8 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import gameentity.Ball.BallType;
+
 public class BallSequence extends ScreenElement
 {
 	private ArrayList<Ball> balls;
@@ -17,35 +19,43 @@ public class BallSequence extends ScreenElement
 		return balls;
 	}
 	
-	// Returns the ball at the specified position
-        public Ball getBall(int index)
-        {
-          return  balls.get(index);
-        }
-	
 	public void addToBalls( Ball b)
 	{
 		balls.add( b);
 	}
 	
-	// Add the specified ball to specified index in balls.
-        public void addToBalls(int index, Ball b)
+	public void addToBalls( Ball b, int index)
 	{
-		balls.add(index, b);
+		b.setType( BallType.PLAIN);
+		balls.add( index, b);
+		Point nextPoint = balls.get( index - 1).point;
+		b.setPoint( new Point( nextPoint.x, nextPoint.y));
+		b.setDirection( balls.get( index - 1).getDirection());
+		
+		for (int i = index - 1; i > 0 ; i--)
+		{
+			nextPoint = balls.get( i - 1).point;
+			balls.get( i).setPoint( new Point( nextPoint.x, nextPoint.y));
+			balls.get( i).setDirection( balls.get( i - 1).getDirection());
+		}
+		balls.get( 0).moveForward();
 	}
-        
-        // Removes the ball at the specified position
-        public void removeBall(int index)
-        {
-            balls.remove(index);
-        }
-        
-        // fromIndex and toIndex are inclusive
-        public void removeBalls(int fromIndex, int toIndex)
-        {
-            for(int i = fromIndex; i <= toIndex; i++)
-                balls.remove(i);
-        }
+	
+	public void removeBall( int index)
+	{	
+		for (int i = 0; i < index; i++)
+		{
+			Point nextPoint = balls.get( i + 1).point;
+			balls.get( i).setPoint( new Point( nextPoint.x, nextPoint.y));
+			balls.get( i).setDirection( balls.get( i + 1).getDirection());
+		}
+		balls.remove( index);
+	}
+	
+	public Ball get( int index)
+	{
+		return balls.get( index);
+	}
 	
 	public void slide()
 	{
@@ -62,7 +72,8 @@ public class BallSequence extends ScreenElement
 			if (balls.get( i - 1).point != null)
 			{
 				Point nextPoint = balls.get( i - 1).point;
-				balls.get( i).point = new Point( nextPoint.x, nextPoint.y);
+				balls.get( i).setPoint( new Point( nextPoint.x, nextPoint.y));
+				balls.get( i).setDirection( balls.get( i - 1).getDirection());
 			}
 		}
 		first.moveForward();
@@ -73,40 +84,14 @@ public class BallSequence extends ScreenElement
 		// to be done
 	}
 	
-	public boolean contains( Point p)
+	public int contains( Point p)
 	{
 		for (int i = 0; i < balls.size(); i++)
-			if (balls.get( i).contains( p))
-				return true;
-		return false;
+			if (balls.get( i).getPoint() != null)
+				if (balls.get( i).contains( p))
+					return i;
+		return -1;
 	}
-	
-	 // In balls, finds the index of a ball which is hit by the thrown ball(current)
-        public int getIndexOfTargetBall(Point p)
-        {
-            int index = -1;
-            
-            for (int i = 0; i < balls.size(); i++)
-            {
-                if ((balls.get(i)).contains(p))
-                    index = i;
-            }
-            return index;
-			
-        }
-        
-        // In balls, find the ball which is hit by the thrown ball(current)
-        public Ball getTargetBall(Point p)
-        {
-            Ball  target = new Ball();
-            
-            for (int i = 0; i < balls.size(); i++)
-            {
-                if ((balls.get(i)).contains(p))
-                    target = balls.get(i);
-            }
-            return target;
-        }
 	
 	public int getSize()
 	{

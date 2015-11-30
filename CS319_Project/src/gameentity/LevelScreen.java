@@ -2,6 +2,7 @@ package gameentity;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 
@@ -12,10 +13,11 @@ public class LevelScreen extends JPanel
 	private Hole hole;
 	private BallSequence sequence;
 	private BallShooter shooter;
+	private AffineTransform at;
 	
 	public LevelScreen()
 	{
-		setBackground( Color.GRAY);
+		setBackground( Color.LIGHT_GRAY);
 		setPreferredSize( new Dimension( 1000, 1000));
 	}
 	
@@ -24,14 +26,19 @@ public class LevelScreen extends JPanel
 	{
 		super.paintComponent( g);
 		
-		if (maze == null && hole == null && 
-				sequence == null && shooter == null)
+		if (maze != null && hole != null && 
+				sequence != null && shooter != null)
 		{
 			maze.draw( g);
 			hole.draw( g);
 			sequence.draw( g);
-			shooter.draw( g);
+			shooter.draw( g, at);
 		}
+	}
+	
+	public void setAffineTransform( AffineTransform at)
+	{
+		this.at = at;
 	}
 	
 	public Maze getMaze()

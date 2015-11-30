@@ -48,6 +48,7 @@ public class GameManager
 	public void startLevel( int levelNo, LevelScreen levelScreen)
 	{
 		levelManager = new LevelManager( this, levelNo, levelScreen);
+		levelManager.startLevel( levelNo);
 	}
 	
 	public void addPlayer( String name, String password)
@@ -57,11 +58,11 @@ public class GameManager
 	
 	public void removePlayer( int id, String password)
 	{
-		PlayerProxy proxy = players.get( id);
+		PlayerProxy proxy = players.get( id - 1);
 		if (proxy.getPassword().equals( password))
 		{
 			accountManager.removePlayer( id);
-			players.remove( proxy);
+			players.set( id - 1, null);
 		}
 	}
 	
@@ -97,6 +98,16 @@ public class GameManager
 	
 	public void addPlayerProxy( int id, String password)
 	{
-		players.add( id, new PlayerProxy( id, password));
+		players.add( id - 1, new PlayerProxy( id, password));
+	}
+	
+	public boolean checkPlayer( int id, String password)
+	{
+		if (players.get( id - 1).getPassword().equals( password))
+		{
+			accountManager.loadCurrentPlayer( id);
+			return true;
+		}
+		return false;
 	}
 }

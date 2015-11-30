@@ -1,13 +1,13 @@
 package gamecontrol;
 
-import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import gameentity.Ball;
-import gameentity.Ball.BallType;
 import gameentity.BallSequence;
 
-
 public class CollisionManager
-{
+{	
 	private LevelManager levelManager;
 	
 	public CollisionManager( LevelManager levelManager)
@@ -15,111 +15,53 @@ public class CollisionManager
 		this.levelManager = levelManager;
 	}
 	
-	public boolean updateSequence( Ball current, BallSequence sequence)
+	public void updateSequence( Ball current, BallSequence sequence, int index)
 	{
-            // leftIndex and rightIndex will be used for deleting a range from sequence.
-            int leftIndex = -1;
-            int rightIndex = -1;
-            
-            Color currentColor = current.getColor();
-            BallType currentType = current.getType();
-          
-            // If the thrown ball does not hit the Sequence, it will be hanged in the maze and remain stable until sequence catch the ball.
-            if(!(sequence.contains(current.getPoint())))
-            {
-                return true;
-            }
-            // If thrown ball hit the sequence, sequence will be updated.
-            if(sequence.contains(current.getPoint()))
-            {
-                // In sequence, identifies the ball which is hit by current, its color and its index in sequence.
-                int targetIndex = sequence.getIndexOfTargetBall(current.getPoint());
-                Ball target = sequence.getTargetBall(current.getPoint());
-                Color targetColor = target.getColor();
-                
-                //If current hits the target from left part
-                if(target.containsLeftPart(current.getPoint()))
-                {
-                    // Add current to sequence
-                    sequence.addToBalls(targetIndex, current);
-                    
-                    // If current and target have the same color
-                    if(currentColor.equals(targetColor))
-                    {
-                        leftIndex = targetIndex - 1;    // initially leftIndex is currentIndex
-                        rightIndex = targetIndex;   // initially rightIndex is targetIndex
-                        
-                        while(((sequence.getBall(leftIndex - 1)).getColor()).equals(targetColor))
-                                leftIndex--;
-                        
-                        while(((sequence.getBall(rightIndex + 1)).getColor()).equals(targetColor))
-                                rightIndex++;
-                        
-                        // Remove the balls with same color in sequence >= 3
-                        if(rightIndex - leftIndex >= 3)
-                        {
-                            sequence.removeBalls(leftIndex, rightIndex);
-                        } 
-                    }
-                    
-                    // If current and target have not the same color
-                    if(!(currentColor).equals(targetColor))
-                    {
-                        leftIndex = targetIndex - 1;    // initially leftIndex is currentIndex
-                        rightIndex = targetIndex - 1;   // initially rightIndex is currentIndex
-                        
-                        while(((sequence.getBall(leftIndex - 1)).getColor()).equals(targetColor))
-                                leftIndex--;
-                        
-                        if(rightIndex - leftIndex >= 3)
-                        {
-                            sequence.removeBalls(leftIndex, rightIndex);
-                        }
-                    }
-                }
-                
-                // If current hits the target from right part
-                if(target.containsRightPart(current.getPoint()))
-                {
-                    // Add current to sequence
-                    sequence.addToBalls(targetIndex + 1, current);
-                    
-                    // If current and target have the same color
-                    if(currentColor.equals(targetColor))
-                    {
-                        leftIndex = targetIndex;    // initially leftIndex is targetIndex
-                        rightIndex = targetIndex + 1;   // initially rightIndex is currentIndex
-                        
-                        while(((sequence.getBall(leftIndex - 1)).getColor()).equals(targetColor))
-                                leftIndex--;
-                        
-                        while(((sequence.getBall(rightIndex + 1)).getColor()).equals(targetColor))
-                                rightIndex++;
-                        
-                        // Remove the balls with same color in sequence >= 3
-                        if(rightIndex - leftIndex >= 3)
-                        {
-                            sequence.removeBalls(leftIndex, rightIndex);
-                        } 
-                    }
-                    
-                    // If current and target have not the same color
-                    if(!(currentColor).equals(targetColor))
-                    {
-                        leftIndex = targetIndex + 1;    // initially leftIndex is currentIndex
-                        rightIndex = targetIndex + 1;   // initially rightIndex is currentIndex
-                        
-                        while(((sequence.getBall(rightIndex + 1)).getColor()).equals(targetColor))
-                            rightIndex++;
-                        
-                        if(rightIndex - leftIndex >= 3)
-                        {
-                            sequence.removeBalls(leftIndex, rightIndex);
-                        }
-                    }
-                }
-                
-            }
-		return true;
+		levelManager.stopSequence();
+		sequence.addToBalls( new Ball( current.getColor(), current.getType(), 
+									   Ball.getSpecificDirection( current)), index + 1);
+		
+		while (true)
+		{
+			int cnt = 0;
+			ArrayList<Integer> indices = new ArrayList<Integer>();
+			Ball b = sequence.get( index);
+				
+			for (int i = index - 1; i >= 0; i--)
+			{
+				if (sequence.get( i).getColor().equals( b.getColor()))
+				{
+					cnt++;
+					indices.add( i);
+				}
+				else
+					break;
+			}
+				
+			for (int i = index; i < sequence.getSize(); i++)
+			{
+				if (sequence.get( i).getColor().equals( b.getColor()))
+				{
+					cnt++;
+					indices.add( i);
+				}
+				else
+					break;
+			}
+				
+			if (cnt >= 3)
+			{
+				Collections.sort( indices, Collections.reverseOrder());
+					
+				for (int i = 0; i < indices.size(); i++)
+					sequence.removeBall( indices.get( i));
+				index = indices.get( indices.size() - 1);	
+			}
+			else
+				break;
+			
+			levelManager.getLevelScreen().repaint();
+		}
+		levelManager.startSequence();
 	}
 }

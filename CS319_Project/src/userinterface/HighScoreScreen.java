@@ -8,9 +8,9 @@ import gamecontrol.GameManager;
 public class HighScoreScreen extends GameScreen implements Observer
 {
 
-	public HighScoreScreen( ScreenManager screenManager)
+	public HighScoreScreen( ScreenManager screenManager, GameManager gameManager)
 	{
-		super( screenManager);
+		super( screenManager, gameManager);
 	}
 
 	@Override

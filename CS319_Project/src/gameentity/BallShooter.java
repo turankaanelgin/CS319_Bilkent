@@ -1,15 +1,11 @@
 package gameentity;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-
 import javax.imageio.ImageIO;
 
 public class BallShooter extends ScreenElement
@@ -18,16 +14,21 @@ public class BallShooter extends ScreenElement
 	private double angle;
 	private BufferedImage image;
 	private boolean shooting;
+	private boolean hasBall;
+	private Point shootPoint;
 	
 	public BallShooter()
 	{
+		point = new Point( 450, 400);
 		current = null;
 		angle = 0;
 		shooting = false;
+		hasBall = false;
+		shootPoint = null;
 		
 		try
 		{
-			image = ImageIO.read( new File( "bilkent.jpg"));
+			image = ImageIO.read( new File( "bilkent.png"));
 		}
 		catch (IOException e)
 		{
@@ -40,7 +41,7 @@ public class BallShooter extends ScreenElement
 		return current;
 	}
 	
-	public boolean getShooting()
+	public boolean isShooting()
 	{
 		return shooting;
 	}
@@ -50,15 +51,41 @@ public class BallShooter extends ScreenElement
 		shooting = !shooting;
 	}
 	
+	public boolean hasBall()
+	{
+		return hasBall;
+	}
+	
+	public void switchHasBall()
+	{
+		hasBall = !hasBall;
+	}
+	
+	public BufferedImage getImage()
+	{
+		return image;
+	}
+	
+	public Point getShootPoint()
+	{
+		return shootPoint;
+	}
+	
 	public void prepareBall()
 	{
-		current = new Ball();
+		current = new Ball( new Point( point.x + image.getWidth() / 2 - 10, 
+									   point.y + image.getHeight() / 2 - 10));
 		setBallType();
 	}
 	
-	public void rotate( int angle)
+	public AffineTransform rotate( double angle)
 	{
-		// to be implemented
+		AffineTransform at = AffineTransform.getTranslateInstance( point.x, point.y);
+		at.translate( image.getHeight() / 2, image.getWidth() / 2);
+		at.rotate( Math.toRadians( angle));
+		at.translate( -image.getWidth() / 2, -image.getHeight() / 2);
+		this.angle = angle;
+		return at;
 	}
 	
 	public void changeBallType( Ball.BallType type)
@@ -66,27 +93,68 @@ public class BallShooter extends ScreenElement
 		current.setType( type);
 	}
 	
-	public void shoot()
+	public void shoot( Point shootPoint)
 	{
-		double slope = Math.tan( angle);
+		this.shootPoint = shootPoint;
 		Point currPoint = current.point;
+		double slope = (double) (shootPoint.y - currPoint.y - Ball.SIZE / 2) / (shootPoint.x - currPoint.x - Ball.SIZE / 2);
+		double shootAngle = Math.toDegrees( Math.atan( slope));
 		
-		if (0 <= angle && angle < 90 || 270 < angle && angle < 360)
+		if (Double.isNaN( shootAngle) && (-180 <= angle && angle <= -80 || 170 <= angle && angle <= 180))
 		{
-			current.setPoint( new Point( currPoint.x + Ball.SIZE, 
-							  currPoint.y + (int) (Ball.SIZE * slope)));
+			current.setPoint( new Point( currPoint.x - Ball.SIZE, currPoint.y - Ball.SIZE));
+			shooting = true;
 		}
-		else if (90 < angle && angle < 270)
+		else if (Double.isNaN( shootAngle) && 60 <= angle && angle <= 100) 
 		{
-			current.setPoint( new Point( currPoint.x - Ball.SIZE, 
-					  		  currPoint.y + (int) (Ball.SIZE * slope)));
+			current.setPoint( new Point( currPoint.x, currPoint.y + Ball.SIZE));
+			shooting = true;
 		}
-		else if (angle == 90 || angle == 270)
+		else if (Double.isNaN( shootAngle) && 100 <= angle && angle <= 170) 
 		{
-			current.setPoint( new Point( currPoint.x,
-							  currPoint.y + (int) (Ball.SIZE * slope)));
+			current.setPoint( new Point( currPoint.x - Ball.SIZE, currPoint.y + Ball.SIZE));
+			shooting = true;
 		}
-		shooting = true;
+		else if (Double.isNaN( shootAngle) && -90 <= angle && angle <= 0) 
+		{
+			current.setPoint( new Point( currPoint.x, currPoint.y - Ball.SIZE));
+			shooting = true;
+		}
+		else if ((int) Math.abs( shootAngle) <= 1 && 170 <= angle && angle <= 180)
+		{
+			current.setPoint( new Point( currPoint.x - Ball.SIZE, currPoint.y));
+			shooting = true;
+		}
+		else if (0 <= shootAngle && shootAngle <= 90 && (-180 <= angle && angle <= -80 || 170 <= angle && angle <= 180))
+		{
+			current.setPoint( new Point( currPoint.x - Ball.SIZE, currPoint.y - (int) (Ball.SIZE * slope)));
+			shooting = true;
+		}
+		else if (-90 <= shootAngle && shootAngle <= 0 && 85 <= angle && angle <= 175)
+		{
+			current.setPoint( new Point( currPoint.x - Ball.SIZE, currPoint.y - (int) (Ball.SIZE * slope)));
+			shooting = true;
+		} 
+		else if (70 <= angle && angle <= 90)
+		{
+			current.setPoint( new Point( currPoint.x, currPoint.y + Ball.SIZE));
+			shooting = true;
+		}
+		else if (0 <= shootAngle && shootAngle <= 90 && 0 <= angle && angle <= 70)
+		{
+			current.setPoint( new Point( currPoint.x + Ball.SIZE, currPoint.y + (int) (Ball.SIZE * slope)));
+			shooting = true;
+		}
+		else if (-90 <= shootAngle && shootAngle <= 0 && -60 <= angle && angle <= 10)
+		{
+			current.setPoint( new Point( currPoint.x + Ball.SIZE, currPoint.y + (int) (Ball.SIZE * slope)));
+			shooting = true;
+		}
+		else if (-100 <= shootAngle && shootAngle <= 90 && -85 <= angle && angle <= -60)
+		{
+			current.setPoint( new Point( currPoint.x, currPoint.y - Ball.SIZE));
+			shooting = true;
+		}
 	}
 	
 	private void setBallType()
@@ -112,9 +180,24 @@ public class BallShooter extends ScreenElement
 		}
 	}
 	
+	public void draw( Graphics g, AffineTransform at)
+	{
+		if (at != null)
+		{
+			Graphics2D g2 = (Graphics2D) g;
+			g2.drawImage( image, at, null);
+			if (current != null)
+				current.draw( g);
+		}
+		else
+			draw( g);	
+	}
+
 	@Override
-	public void draw( Graphics g)
+	public void draw(Graphics g)
 	{
 		g.drawImage( image, point.x, point.y, null);
+		if (current != null)
+			current.draw( g);
 	}
 }

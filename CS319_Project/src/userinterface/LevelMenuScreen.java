@@ -8,9 +8,9 @@ import gamecontrol.GameManager;
 public class LevelMenuScreen extends GameScreen implements Observer
 {
 
-	public LevelMenuScreen( ScreenManager screenManager)
+	public LevelMenuScreen( ScreenManager screenManager, GameManager gameManager)
 	{
-		super( screenManager);
+		super( screenManager, gameManager);
 	}
 
 	@Override

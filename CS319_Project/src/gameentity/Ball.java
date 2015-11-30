@@ -90,6 +90,44 @@ public class Ball extends ScreenElement
 		this.type = type;
 	}
 	
+	public Direction getDirection()
+	{
+		return dir;
+	}
+	
+	public void setDirection( Direction dir)
+	{
+		this.dir = dir;
+	}
+	
+	public static Direction getSpecificDirection( Ball b)
+	{
+		int x = b.point.x;
+		int y = b.point.y;
+		
+		if (x == Maze.X && y < Maze.Y + Maze.BORDERS[0] - SIZE)
+			return Direction.DOWN;
+		if (x < Maze.X + Maze.BORDERS[1] - SIZE && y == Maze.Y + Maze.BORDERS[0] - SIZE)
+			return Direction.RIGHT;
+		if (x == Maze.X + Maze.BORDERS[1] - SIZE && y > Maze.Y + Maze.BORDERS[2])
+			return Direction.UP;
+		if (x > Maze.X + Maze.BORDERS[3] && y == Maze.Y + Maze.BORDERS[2])
+			return Direction.LEFT;
+		if (x == Maze.X + Maze.BORDERS[3] && y < Maze.Y + Maze.BORDERS[4] - SIZE)
+			return Direction.DOWN;
+		if (x < Maze.X + Maze.BORDERS[5] - SIZE && y == Maze.Y + Maze.BORDERS[4] - SIZE)
+			return Direction.LEFT;
+		if (x == Maze.X + Maze.BORDERS[5] - SIZE && y > Maze.Y + Maze.BORDERS[6])
+			return Direction.UP;
+		if (x > Maze.X + Maze.BORDERS[7] && y == Maze.Y + Maze.BORDERS[6])
+			return Direction.LEFT;
+		if (x == Maze.X + Maze.BORDERS[7] && y < Maze.Y + Maze.BORDERS[8] - SIZE)
+			return Direction.DOWN;
+		if (x < Maze.X + Maze.BORDERS[9] && y == Maze.Y + Maze.BORDERS[8] - SIZE)
+			return Direction.LEFT;
+		return null;
+	}
+	
 	public void moveForward()
 	{
 		if (dir == Direction.LEFT)
@@ -141,35 +179,23 @@ public class Ball extends ScreenElement
 		return false;
 	}
 	
-	// Check the collision from left part of the ball
-        public boolean containsLeftPart(Point p)
-        {
-                if (p.x > point.x && p.x < point.x + (SIZE / 2))
-			if (p.y > point.y && p.y < point.y + SIZE)
-				return true;
-		return false;
-        }
-        
-        // Check the collision from right part of the ball
-        public boolean containsRightPart(Point p)
-        {
-            	if (p.x >= point.x + (SIZE / 2) && p.x < point.x + SIZE)
-			if (p.y > point.y && p.y < point.y + SIZE)
-				return true;
-		return false;
-        }
-	
 	@Override
 	public void draw( Graphics g) 
 	{
 		g.setColor( color);
 		g.fillOval( point.x, point.y, SIZE, SIZE);
 		
+		if (color == Color.BLUE || color == Color.GREEN || 
+			color == Color.RED || color == Color.MAGENTA)
+			g.setColor( Color.WHITE);
+		else if (color == Color.YELLOW || color == Color.ORANGE)
+			g.setColor( Color.BLACK);
+		
 		if (type == BallType.BOMB)
-			g.drawString( "!", point.x + 5, point.y + 5);
+			g.drawString( "!", point.x + 15, point.y + 15);
 		else if (type == BallType.BACK)
-			g.drawString( "<", point.x + 5, point.y + 5);
+			g.drawString( "<", point.x + 15, point.y + 15);
 		else if (type == BallType.FREEZE)
-			g.drawString( "F", point.x + 5, point.y + 5);
+			g.drawString( "F", point.x + 15, point.y + 15);
 	}
 }
