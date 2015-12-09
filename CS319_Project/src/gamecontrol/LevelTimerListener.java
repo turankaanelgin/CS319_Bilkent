@@ -12,18 +12,23 @@ import gameentity.LevelScreen;
 public class LevelTimerListener implements ActionListener
 {
 	private LevelManager levelManager;
-	private boolean rewinds;
+	private int rewinds = 0;
+	private int explodes = 0;
 	
 	public LevelTimerListener( LevelManager levelManager)
 	{
 		this.levelManager = levelManager;
 	}
 	
-	public void setRewinds( boolean rewinds)
+	public void setRewinds()
 	{
-		this.rewinds = rewinds;
+		rewinds = 1;
 	}
 	
+	public void setExplode()
+	{
+		explodes = 1;
+	}
 	@Override
 	public void actionPerformed( ActionEvent arg0)
 	{
@@ -76,7 +81,21 @@ public class LevelTimerListener implements ActionListener
 		{
 			LevelScreen screen = levelManager.getLevelScreen();
 			BallSequence sequence = screen.getSequence();
-			sequence.slide();
+			if(rewinds > 0)
+			{
+				rewinds++;
+				rewinds = rewinds % 5;
+				sequence.rewind();
+			}	
+			else
+				sequence.slide();
+			
+			if(explodes > 0)
+			{
+				explodes++;
+				explodes = explodes % 7;
+				sequence.explode(0);
+			}
 		}	
 	}	
 }
