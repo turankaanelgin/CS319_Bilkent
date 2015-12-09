@@ -32,6 +32,21 @@ public class LevelManager
 		soundManager = new SoundManager( this);
 		undo = false;
 	}
+	
+	public void rewind()
+	{
+		levelTimerListener.setRewinds();
+	}
+	
+	public void explode()
+	{
+		levelTimerListener.setExplode();
+	}
+	
+	public void playSound(Ball.BallType type)
+	{
+		soundManager.playSound(type);
+	}
 
 	public int getLevelNo()
 	{
