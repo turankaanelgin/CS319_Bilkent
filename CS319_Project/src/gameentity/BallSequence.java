@@ -81,8 +81,30 @@ public class BallSequence extends ScreenElement
 	
 	public void rewind()
 	{
-		// to be done
+		Ball last = balls.get(balls.size() - 1);
+		
+		if(last.point == null)
+		{
+			last.point = new Point(Maze.X, Maze.Y);
+			return;
+		}
+		
+		
+		for(int i = 0; i < balls.size() - 1; i++)
+		{
+			if(balls.get(i + 1).point != null)
+			{
+				Point nextPoint = balls.get(i + 1).point;
+				balls.get(i).setPoint( new Point(nextPoint.x, nextPoint.y));
+				balls.get(i).setDirection( balls.get(i + 1).getDirection());
+			}
+		}
+		last.moveBackward();
 	}
+	
+	public void explode(int index)
+	{
+			removeBall(index);
 	
 	public int contains( Point p)
 	{
