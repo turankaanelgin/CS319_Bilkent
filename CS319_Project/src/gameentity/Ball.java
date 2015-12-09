@@ -168,7 +168,51 @@ public class Ball extends ScreenElement
 	
 	public void moveBackward()
 	{
-		// to be done
+		if (dir == Direction.LEFT)
+		{
+			if (point.x == Maze.X + Maze.BORDERS[8] && point.y == Maze.X)
+				dir = Direction.UP;
+			else if (point.x == Maze.X + Maze.BORDERS[4] && point.y == Maze.Y + Maze.BORDERS[5])
+				dir = Direction.UP;
+			else if (point.x == Maze.X + Maze.BORDERS[0] && point.y == Maze.Y + Maze.BORDERS[1])
+				dir = Direction.UP;
+			else
+				point.setLocation(point.x - SIZE, point.y);
+			
+		}
+		
+		else if(dir == Direction.RIGHT)
+		{
+			
+			if (point.x == Maze.X + Maze.BORDERS[6] - SIZE && point.y == Maze.Y + Maze.BORDERS[7] - SIZE)
+				dir = Direction.DOWN;
+			else if (point.x == Maze.X + Maze.BORDERS[2] - SIZE && point.y == Maze.Y + Maze.BORDERS[3] - SIZE)
+				dir = Direction.DOWN;
+			else
+				point.setLocation( point.x + SIZE, point.y);
+		}
+		
+		else if(dir == Direction.UP)
+		{
+			if (point.x == Maze.X + Maze.BORDERS[8] - SIZE && point.y == Maze.Y + Maze.BORDERS[7])
+				dir = Direction.RIGHT;
+			else if (point.x == Maze.X + Maze.BORDERS[4] - SIZE && point.y == Maze.Y + Maze.BORDERS[3])
+				dir = Direction.RIGHT;
+			else if(point.x == Maze.X + Maze.BORDERS[0] - SIZE && point.y == Maze.Y)
+				dir = Direction.RIGHT;
+			else
+				point.setLocation( point.x, point.y - SIZE);
+		}
+		
+		else if(dir == Direction.DOWN)
+		{
+			if (point.x == Maze.X + Maze.BORDERS[6] && point.y == Maze.Y + Maze.BORDERS[5] - SIZE)
+				dir = Direction.LEFT;	
+			else if (point.x == Maze.X + Maze.BORDERS[2] && point.y == Maze.Y + Maze.BORDERS[1] - SIZE)
+				dir = Direction.LEFT;
+			else
+				point.setLocation( point.x, point.y + SIZE);	
+		}
 	}
 	
 	public boolean contains( Point p)
