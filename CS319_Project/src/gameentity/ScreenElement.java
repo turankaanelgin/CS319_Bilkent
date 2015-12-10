@@ -1,7 +1,6 @@
 package gameentity;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.geom.Point2D;
 
 public abstract class ScreenElement 
 {

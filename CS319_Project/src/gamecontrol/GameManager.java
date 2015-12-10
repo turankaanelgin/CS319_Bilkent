@@ -1,74 +1,140 @@
 package gamecontrol;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Observer;
 
+import gamecontrol.levelcontrol.LevelManager;
+import gamecontrol.playercontrol.AccountManager;
+import gamecontrol.playercontrol.AccountManagerAdapter;
+import gamecontrol.playercontrol.Player;
+import gamecontrol.playercontrol.StoreItem;
 import gameentity.Ball;
 import gameentity.LevelScreen;
-import userinterface.CreateAccountScreen;
-import userinterface.DeleteAccountScreen;
-import userinterface.HelpScreen;
-import userinterface.HighScoreScreen;
-import userinterface.LevelMenuScreen;
-import userinterface.LoginScreen;
-import userinterface.MainMenuScreen;
-import userinterface.PauseMenuScreen;
-import userinterface.StoreMenuScreen;
+import gameentity.Ball.BallType;
+import userinterface.gamescreen.GameScreen;
+import userinterface.gamescreen.HelpScreen;
+import userinterface.gamescreen.HighScoreScreen;
+import userinterface.gamescreen.LevelMenuScreen;
+import userinterface.gamescreen.MainMenuScreen;
+import userinterface.gamescreen.PauseMenuScreen;
 
 public class GameManager
 {
 	private AccountManager accountManager;
 	private LevelManager levelManager;
-	private ArrayList<PlayerProxy> players;
-	private MainMenuScreen mainMenuScreen;
-	private StoreMenuScreen storeMenuScreen;
-	private PauseMenuScreen pauseMenuScreen;
-	private LevelMenuScreen levelMenuScreen;
-	private LoginScreen loginScreen;
-	private CreateAccountScreen createAccountScreen;
-	private DeleteAccountScreen deleteAccountScreen;
-	private HelpScreen helpScreen;
-	private HighScoreScreen highScoreScreen;
+	private HashMap<Integer, String> players;
+	private GameScreen pauseMenuScreen;
+	private GameScreen helpScreen;
+	private GameScreen mainMenuScreen;
+	private Observer storeMenuScreen;
+	private Observer levelMenuScreen;
+	private Observer highScoreScreen;
+	private Observer levelScreen;
 	
 	public GameManager()
 	{
-		accountManager = new AccountManager( this);
-		players = new ArrayList<PlayerProxy>();
+		accountManager = new AccountManagerAdapter( this);
+		players = new HashMap<Integer, String>();
 	}
 	
-	public void setLoginScreen( LoginScreen loginScreen)
-	{
-		this.loginScreen = loginScreen;
-	}
-	
-	public void setCreateAccountScreen( CreateAccountScreen createAccountScreen)
-	{
-		this.createAccountScreen = createAccountScreen;
-	}
-	
-	public void startLevel( int levelNo, LevelScreen levelScreen)
+	public void startLevel( int levelNo, LevelScreen levelScreen, boolean guest)
 	{
 		levelManager = new LevelManager( this, levelNo, levelScreen);
+		if (guest)
+		{
+			levelManager.setAsGuest();
+			((PauseMenuScreen) pauseMenuScreen).setAsGuest();
+		}
+		else 
+			((PauseMenuScreen) pauseMenuScreen).setAsUser();
 		levelManager.startLevel( levelNo);
 	}
 	
-	public void addPlayer( String name, String password)
+	public void setMainMenuScreen( GameScreen mainMenuScreen)
 	{
-		accountManager.addPlayer( name, password);
+		this.mainMenuScreen = mainMenuScreen;
 	}
 	
-	public void removePlayer( int id, String password)
+	public void setLevelScreens( GameScreen pauseMenuScreen, GameScreen helpScreen)
 	{
-		PlayerProxy proxy = players.get( id - 1);
-		if (proxy.getPassword().equals( password))
+		this.pauseMenuScreen = pauseMenuScreen;
+		this.helpScreen = helpScreen;
+	}
+	
+	public void setObservers( Observer levelMenuScreen, Observer highScoreScreen, 
+							  Observer storeMenuScreen, Observer levelScreen)
+	{
+		this.levelMenuScreen = levelMenuScreen;
+		this.highScoreScreen = highScoreScreen;
+		this.storeMenuScreen = storeMenuScreen;
+		this.levelScreen = levelScreen;
+	}
+	
+	public void setTopTen( Player[] topTen)
+	{
+		((HighScoreScreen) highScoreScreen).setScoreTable( topTen);
+	}
+	
+	public void setScoreNo()
+	{
+		((HighScoreScreen) highScoreScreen).setTotalNo( players.size());
+	}
+	
+	/**@pre !(self.accountManager = null)
+	 * */
+	public int addPlayer( String name, String password)
+	{
+		int id = ((AccountManagerAdapter) accountManager).addPlayer( name, password);
+		addPlayerProxy( id, password);
+		setScoreNo();
+		setTopTen( accountManager.getTopTen());
+		accountManager.setObservers( id);
+		return id;
+	}
+	
+	/**@pre !(self.accountManager = null)
+	 * @pre self.players->includes(self.key = id & self.value = password) = True
+	 * @post self.players->includes(self.key = id & self.value = password) = False
+	 * @post self.players->size = self@pre.players->size - 1
+	 * */
+	public boolean removePlayer( int id, String password)
+	{
+		if (!players.containsKey( id))
+			return false;
+		
+		if (players.get( id).equals( password))
 		{
+			players.remove( id);
 			accountManager.removePlayer( id);
-			players.set( id - 1, null);
+			return true;
 		}
+		return false;
 	}
 	
-	public void addPlayerItem( StoreItem item)
+	/**@pre self.accountManager.getPlayers().getObservers()->asSet()->includes (o) = False
+	 * @post self.accountManager.getPlayers().getObservers()->asSet()->includes (o) = True
+	 * */
+	public void addPlayerObservers()
 	{
-		accountManager.addPlayerItem( item);
+		accountManager.addPlayerObserver( levelMenuScreen);
+		accountManager.addPlayerObserver( highScoreScreen);
+		accountManager.addPlayerObserver( storeMenuScreen);
+		accountManager.addPlayerObserver( levelScreen);
+	}
+	
+	public void undoPlayerItem( Ball.BallType type)
+	{
+		if (type == BallType.BOMB)
+			accountManager.undoPlayerItem( StoreItem.BOMB_BALL);
+		else if (type == BallType.BACK)
+			accountManager.undoPlayerItem( StoreItem.BACK_BALL);
+		else if (type == BallType.FREEZE)
+			accountManager.undoPlayerItem( StoreItem.FREEZE_BALL);
+	}
+	
+	public boolean addPlayerItem( StoreItem item)
+	{
+		return accountManager.addPlayerItem( item);
 	}
 	
 	public void addPlayerScore( int levelNo, int score)
@@ -76,38 +142,98 @@ public class GameManager
 		accountManager.addPlayerScore( levelNo, score);
 	}
 	
-	public void setCurrentPlayer( int id, String password)
+	public void addPlayerCoin( int value)
 	{
-		
+		accountManager.addPlayerCoin( value);
 	}
 	
-	public boolean hasItem( Ball.BallType type)
+	public void addPlayerCheckpoint( int checkpoint)
+	{
+		accountManager.addPlayerCheckpoint( checkpoint);
+	}
+	
+	/**@pre self.players.getKeys()->asSet->includes(id) = False
+	 * @post self.players->includes(self.key = id & self.value = password) = True
+	 * */
+	public void addPlayerProxy( int id, String password)
+	{
+		if (!players.containsKey( id))
+			players.put( id, password);
+	}
+	
+	public StoreItem hasItem( Ball.BallType type)
 	{
 		return accountManager.hasItem( type);
 	}
 	
+	public void useItem( StoreItem item)
+	{
+		accountManager.usePlayerItem( item);
+	}
+	
 	public void pause()
 	{
-		pauseMenuScreen.display();
+		((PauseMenuScreen) pauseMenuScreen).display();
 	}
 	
 	public void help()
 	{
-		helpScreen.display();
+		((HelpScreen) helpScreen).display();
 	}
 	
-	public void addPlayerProxy( int id, String password)
+	public void resume()
 	{
-		players.add( id - 1, new PlayerProxy( id, password));
+		levelManager.startSequence();
 	}
 	
-	public boolean checkPlayer( int id, String password)
+	public void toggleSound()
 	{
-		if (players.get( id - 1).getPassword().equals( password))
+		levelManager.toggleSound();
+	}
+	
+	public int getPlayerCheckpoint()
+	{
+		return accountManager.getPlayerCheckpoint();
+	}
+	
+	public int getPlayerLive()
+	{
+		return accountManager.getPlayerLive();
+	}
+	
+	/**@pre self.players.getKeys()->includes(id)= True
+	 * @pre !(accountManager = null)
+	 * */
+	public boolean loadPlayer( int id, String password)
+	{
+		if (!players.containsKey( id))
+			return false;
+		
+		if (players.get( id).equals( password))
 		{
 			accountManager.loadCurrentPlayer( id);
 			return true;
 		}
 		return false;
+	}
+	
+	public void goToMainMenu()
+	{
+		((MainMenuScreen) mainMenuScreen).display();
+	}
+	
+	public void goToLevelMenu()
+	{
+		((LevelMenuScreen) levelMenuScreen).display();
+	}
+	
+	public void saveGame()
+	{
+		accountManager.saveGame();
+	}
+	
+	public void loadGame()
+	{
+		accountManager.loadPlayers();
 	}
 }

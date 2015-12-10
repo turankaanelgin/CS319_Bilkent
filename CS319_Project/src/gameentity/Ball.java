@@ -53,7 +53,12 @@ public class Ball extends ScreenElement
 		return color;
 	}
 	
-	private void setColor()
+	public void setColor( Color color)
+	{
+		this.color = color;
+	}
+	
+	public void setColor()
 	{
 		int random = (int) (Math.random() * 5);
 		
@@ -170,23 +175,21 @@ public class Ball extends ScreenElement
 	{
 		if (dir == Direction.LEFT)
 		{
-			if (point.x == Maze.X + Maze.BORDERS[8] && point.y == Maze.X)
+			if (point.x == Maze.X + Maze.BORDERS[7] && point.y == Maze.Y + Maze.BORDERS[8] - SIZE)
 				dir = Direction.UP;
-			else if (point.x == Maze.X + Maze.BORDERS[4] && point.y == Maze.Y + Maze.BORDERS[5])
+			else if (point.x == Maze.X + Maze.BORDERS[3] && point.y == Maze.Y + Maze.BORDERS[4] - SIZE)
 				dir = Direction.UP;
-			else if (point.x == Maze.X + Maze.BORDERS[0] && point.y == Maze.Y + Maze.BORDERS[1])
+			else if (point.x == Maze.X && point.y == Maze.Y + Maze.BORDERS[0] - SIZE)
 				dir = Direction.UP;
 			else
 				point.setLocation(point.x - SIZE, point.y);
-			
 		}
 		
 		else if(dir == Direction.RIGHT)
 		{
-			
-			if (point.x == Maze.X + Maze.BORDERS[6] - SIZE && point.y == Maze.Y + Maze.BORDERS[7] - SIZE)
+			if (point.x == Maze.X + Maze.BORDERS[5] - SIZE && point.y == Maze.Y + Maze.BORDERS[6])
 				dir = Direction.DOWN;
-			else if (point.x == Maze.X + Maze.BORDERS[2] - SIZE && point.y == Maze.Y + Maze.BORDERS[3] - SIZE)
+			else if (point.x == Maze.X + Maze.BORDERS[1] - SIZE && point.y == Maze.Y + Maze.BORDERS[2])
 				dir = Direction.DOWN;
 			else
 				point.setLocation( point.x + SIZE, point.y);
@@ -194,11 +197,9 @@ public class Ball extends ScreenElement
 		
 		else if(dir == Direction.UP)
 		{
-			if (point.x == Maze.X + Maze.BORDERS[8] - SIZE && point.y == Maze.Y + Maze.BORDERS[7])
+			if (point.x == Maze.X + Maze.BORDERS[7] && point.y == Maze.Y + Maze.BORDERS[6])
 				dir = Direction.RIGHT;
-			else if (point.x == Maze.X + Maze.BORDERS[4] - SIZE && point.y == Maze.Y + Maze.BORDERS[3])
-				dir = Direction.RIGHT;
-			else if(point.x == Maze.X + Maze.BORDERS[0] - SIZE && point.y == Maze.Y)
+			else if (point.x == Maze.X + Maze.BORDERS[3] && point.y == Maze.Y + Maze.BORDERS[2])
 				dir = Direction.RIGHT;
 			else
 				point.setLocation( point.x, point.y - SIZE);
@@ -206,12 +207,12 @@ public class Ball extends ScreenElement
 		
 		else if(dir == Direction.DOWN)
 		{
-			if (point.x == Maze.X + Maze.BORDERS[6] && point.y == Maze.Y + Maze.BORDERS[5] - SIZE)
+			if (point.x == Maze.X + Maze.BORDERS[5] - SIZE && point.y == Maze.Y + Maze.BORDERS[4] - SIZE)
 				dir = Direction.LEFT;	
-			else if (point.x == Maze.X + Maze.BORDERS[2] && point.y == Maze.Y + Maze.BORDERS[1] - SIZE)
+			else if (point.x == Maze.X + Maze.BORDERS[1] - SIZE && point.y == Maze.Y + Maze.BORDERS[0] - SIZE)
 				dir = Direction.LEFT;
 			else
-				point.setLocation( point.x, point.y + SIZE);	
+				point.setLocation( point.x, point.y + SIZE);
 		}
 	}
 	
@@ -226,20 +227,23 @@ public class Ball extends ScreenElement
 	@Override
 	public void draw( Graphics g) 
 	{
-		g.setColor( color);
-		g.fillOval( point.x, point.y, SIZE, SIZE);
-		
-		if (color == Color.BLUE || color == Color.GREEN || 
-			color == Color.RED || color == Color.MAGENTA)
-			g.setColor( Color.WHITE);
-		else if (color == Color.YELLOW || color == Color.ORANGE)
-			g.setColor( Color.BLACK);
-		
-		if (type == BallType.BOMB)
-			g.drawString( "!", point.x + 15, point.y + 15);
-		else if (type == BallType.BACK)
-			g.drawString( "<", point.x + 15, point.y + 15);
-		else if (type == BallType.FREEZE)
-			g.drawString( "F", point.x + 15, point.y + 15);
+		if (point != null)
+		{
+			g.setColor( color);
+			g.fillOval( point.x, point.y, SIZE, SIZE);
+			
+			if (color == Color.BLUE || color == Color.GREEN || 
+				color == Color.RED || color == Color.MAGENTA)
+				g.setColor( Color.WHITE);
+			else if (color == Color.YELLOW || color == Color.ORANGE)
+				g.setColor( Color.BLACK);
+			
+			if (type == BallType.BOMB)
+				g.drawString( "!", point.x + SIZE / 2, point.y + SIZE / 2);
+			else if (type == BallType.BACK)
+				g.drawString( "<", point.x + SIZE / 2, point.y + SIZE / 2);
+			else if (type == BallType.FREEZE)
+				g.drawString( "F", point.x + SIZE / 2, point.y + SIZE / 2);
+		}
 	}
 }
